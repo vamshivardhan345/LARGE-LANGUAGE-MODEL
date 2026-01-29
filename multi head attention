@@ -1,0 +1,71 @@
+!pip install torch
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+import numpy as np
+class MultiHeadAttention(nn.Module):
+    def __init__(self, embed_size, num_heads):
+        super(MultiHeadAttention, self).__init__()
+        self.embed_size = embed_size
+        self.num_heads = num_heads
+        assert embed_size % num_heads == 0, "Embedding size must be divisible by number of heads"
+        
+        self.head_dim = embed_size // num_heads
+        
+        # Linear layers for query, key, value
+        self.query = nn.Linear(embed_size, embed_size)
+        self.key = nn.Linear(embed_size, embed_size)
+        self.value = nn.Linear(embed_size, embed_size)
+        
+        # Output linear layer
+        self.fc_out = nn.Linear(embed_size, embed_size)
+    
+    def forward(self, x):
+        N, seq_length, embed_size = x.shape
+        
+        # Linear projections
+        Q = self.query(x)
+        K = self.key(x)
+        V = self.value(x)
+        
+        # Split into heads
+        Q = Q.view(N, seq_length, self.num_heads, self.head_dim).transpose(1,2)
+        K = K.view(N, seq_length, self.num_heads, self.head_dim).transpose(1,2)
+        V = V.view(N, seq_length, self.num_heads, self.head_dim).transpose(1,2)
+        
+        # Scaled dot-product attention
+        scores = torch.matmul(Q, K.transpose(-2, -1)) / np.sqrt(self.head_dim)
+        attention = F.softmax(scores, dim=-1)
+        
+        out = torch.matmul(attention, V)
+        
+        # Concatenate heads
+        out = out.transpose(1,2).contiguous().view(N, seq_length, embed_size)
+        out = self.fc_out(out)
+        return out, attention
+# Example sentence tokens
+tokens = ["I", "love", "machine", "learning"]
+vocab_size = len(tokens)
+embed_size = 16  # embedding dimension
+num_heads = 2
+
+# Random embeddings for demonstration
+torch.manual_seed(42)
+x = torch.rand(1, vocab_size, embed_size)  # shape [batch, seq_len, embed_dim]
+mha = MultiHeadAttention(embed_size=embed_size, num_heads=num_heads)
+out, attention = mha(x)
+
+print("Output shape:", out.shape)  # [1, seq_len, embed_size]
+print("Attention shape:", attention.shape)  # [batch, heads, seq_len, seq_len]
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+attention = attention.detach().numpy()[0]  # take batch 0
+
+for head in range(num_heads):
+    plt.figure(figsize=(6,5))
+    sns.heatmap(attention[head], annot=True, xticklabels=tokens, yticklabels=tokens, cmap="Blues")
+    plt.title(f"Head {head+1} Attention")
+    plt.xlabel("Key")
+    plt.ylabel("Query")
+    plt.show()
