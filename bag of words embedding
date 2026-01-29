@@ -1,0 +1,25 @@
+# Install scikit-learn if not installed
+!pip install scikit-learn
+
+from sklearn.feature_extraction.text import CountVectorizer
+
+# Example corpus
+corpus = [
+    "I love machine learning",
+    "Machine learning is fun",
+    "I love coding"
+]
+
+# Create BoW vectorizer
+vectorizer = CountVectorizer()
+
+# Fit and transform the corpus
+X = vectorizer.fit_transform(corpus)
+
+# Get feature names (words)
+print("Vocabulary:", vectorizer.get_feature_names_out())
+
+# Convert sparse matrix to dense for visualization
+bow_embeddings = X.toarray()
+print("\nBag of Words Embeddings:")
+print(bow_embeddings)
