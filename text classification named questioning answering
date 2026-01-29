@@ -1,0 +1,42 @@
+!pip install transformers torch
+from transformers import pipeline
+
+# Question classification (zero-shot)
+question_classifier = pipeline(
+    "zero-shot-classification",
+    model="facebook/bart-large-mnli"
+)
+
+# Question Answering model
+qa_pipeline = pipeline(
+    "question-answering",
+    model="distilbert-base-uncased-distilled-squad"
+)
+context = """
+Sundar Pichai is the CEO of Google.
+Google was founded in 1998 and is headquartered in California.
+"""
+
+question = "Who is the CEO of Google?"
+question_labels = [
+    "person",
+    "location",
+    "date",
+    "organization",
+    "definition"
+]
+
+classification = question_classifier(
+    question,
+    candidate_labels=question_labels
+)
+
+print("Question Type:", classification["labels"][0])
+answer = qa_pipeline(
+    question=question,
+    context=context
+)
+
+print("\nAnswer:")
+print("Text:", answer["answer"])
+print("Confidence:", round(answer["score"], 3))
