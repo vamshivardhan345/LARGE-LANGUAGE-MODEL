@@ -1,0 +1,24 @@
+# Path to your downloaded GloVe file
+# Download GloVe embeddings (if not already present)
+!wget http://nlp.stanford.edu/data/glove.6B.zip
+!unzip -o glove.6B.zip
+glove_file = "glove.6B.50d.txt"
+
+# Load embeddings into a dictionary
+embeddings_index = {}
+with open(glove_file, 'r', encoding='utf8') as f:
+    for line in f:
+        values = line.split()
+        word = values[0]
+        vector = [float(v) for v in values[1:]]
+        embeddings_index[word] = vector
+
+print(f"Total words in GloVe: {len(embeddings_index)}")
+word = "learning"
+
+if word in embeddings_index:
+    embedding = embeddings_index[word]
+    print(f"GloVe embedding for '{word}':\n{embedding}")
+    print(f"Embedding size: {len(embedding)}")
+else:
+    print(f"Word '{word}' not found in GloVe embeddings")
