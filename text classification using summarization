@@ -1,0 +1,28 @@
+!pip install transformers torch
+from transformers import pipeline
+
+# Summarization model
+summarizer = pipeline(
+    "summarization",
+    model="facebook/bart-large-cnn"
+)
+
+# Text classification model (sentiment as example)
+classifier = pipeline(
+    "text-classification",
+    model="distilbert-base-uncased-finetuned-sst-2-english"
+)
+text = """
+Machine learning is transforming industries by enabling systems to learn from data.
+It is widely used in healthcare, finance, and autonomous systems.
+However, challenges such as data bias and interpretability still exist.
+"""
+summary = summarizer(text, max_length=60, min_length=30, do_sample=False)
+summary_text = summary[0]['summary_text']
+
+print("Summary:")
+print(summary_text)
+result = classifier(summary_text)
+
+print("\nClassification Result:")
+print(result)
