@@ -1,0 +1,44 @@
+!pip install torch
+import torch
+import torch.nn.functional as F
+# Example sentence
+sentence = ["I", "love", "machine", "learning"]
+
+# Number of words and embedding size
+seq_len = len(sentence)
+embed_size = 8  # small for visualization
+
+# Random embeddings for each word: [seq_len, embed_size]
+torch.manual_seed(0)
+X = torch.rand(seq_len, embed_size)
+print("Word embeddings:\n", X)
+# Initialize weight matrices for Query, Key, Value
+W_q = torch.rand(embed_size, embed_size)
+W_k = torch.rand(embed_size, embed_size)
+W_v = torch.rand(embed_size, embed_size)
+
+# Compute Q, K, V
+Q = X @ W_q  # [seq_len, embed_size]
+K = X @ W_k
+V = X @ W_v
+
+# Compute attention scores
+scores = Q @ K.T  # [seq_len, seq_len]
+
+# Scale scores
+d_k = embed_size
+scores_scaled = scores / (d_k ** 0.5)
+
+# Apply softmax to get attention weights
+attention_weights = F.softmax(scores_scaled, dim=1)
+
+# Compute final attended embeddings
+attended = attention_weights @ V  # [seq_len, embed_size]
+
+print("\nAttention weights:")
+print(attention_weights)
+print("\nAttention for each word:")
+for i, word in enumerate(sentence):
+    print(f"\nWord: '{word}' attends to:")
+    for j, target_word in enumerate(sentence):
+        print(f"  {target_word}: {attention_weights[i,j].item():.3f}")
