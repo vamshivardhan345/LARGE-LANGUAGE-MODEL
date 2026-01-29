@@ -1,0 +1,34 @@
+!pip install transformers torch
+from transformers import AutoTokenizer, AutoModel
+import torch
+
+# Load pretrained BERT model and tokenizer
+model_name = "bert-base-uncased"
+tokenizer = AutoTokenizer.from_pretrained(model_name)
+model = AutoModel.from_pretrained(model_name)
+
+# Example sentence
+sentence = "I love machine learning"
+
+# Tokenize the sentence
+inputs = tokenizer(sentence, return_tensors="pt")
+
+# Get embeddings
+with torch.no_grad():
+    outputs = model(**inputs)
+
+# outputs.last_hidden_state shape: [batch_size, seq_len, hidden_size]
+# hidden_size = 768 for bert-base
+embeddings = outputs.last_hidden_state
+
+print("Shape of embeddings:", embeddings.shape)  # [1, number of tokens, 768]
+
+# Example: embedding of the first token ('[CLS]')
+cls_embedding = embeddings[0][0]
+print("CLS token embedding shape:", cls_embedding.shape)
+
+# Example: embedding of a specific word (like 'machine')
+tokens = tokenizer.tokenize(sentence)
+word_index = tokens.index("machine")  # find index in tokenized list
+word_embedding = embeddings[0][word_index + 1]  # +1 because of [CLS] token
+print(f"Embedding for 'machine':\n", word_embedding)
