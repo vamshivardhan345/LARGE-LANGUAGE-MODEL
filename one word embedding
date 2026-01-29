@@ -1,0 +1,28 @@
+# Install transformers if not already
+!pip install transformers torch
+
+from transformers import AutoTokenizer, AutoModel
+import torch
+
+# Load pre-trained model and tokenizer
+model_name = "distilbert-base-uncased"
+tokenizer = AutoTokenizer.from_pretrained(model_name)
+model = AutoModel.from_pretrained(model_name)
+
+# Word to encode
+word = "night"
+
+# Tokenize the word
+inputs = tokenizer(word, return_tensors="pt")
+
+# Get embeddings
+with torch.no_grad():
+    outputs = model(**inputs)
+
+# The embeddings are in last_hidden_state
+# Shape: [batch_size, sequence_length, hidden_size]
+embedding = outputs.last_hidden_state[0][0]  # Pick the first token
+
+print(f"Word: {word}")
+print(f"Embedding vector size: {embedding.shape}")
+print(embedding)
