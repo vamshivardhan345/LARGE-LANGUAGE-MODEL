@@ -1,0 +1,24 @@
+# Install gensim if not installed
+!pip install gensim
+
+from gensim.models import Word2Vec
+
+# Example corpus (list of tokenized sentences)
+corpus = [
+    ["i", "love", "machine", "learning"],
+    ["machine", "learning", "is", "fun"],
+    ["i", "love", "coding"],
+    ["deep", "learning", "is", "powerful"]
+]
+
+# Train Word2Vec model
+model = Word2Vec(sentences=corpus, vector_size=50, window=3, min_count=1, workers=4)
+
+# Save model (optional)
+model.save("word2vec_model.model")
+
+# Get embedding for a word
+word = "learning"
+embedding = model.wv[word]  # 'wv' is the word vectors
+print(f"Word2Vec embedding for '{word}':\n{embedding}")
+print(f"Embedding size: {len(embedding)}")
